@@ -17,6 +17,11 @@ import java.util.*;
 public class LocalProductRepository implements ProductRepository {
     private final Map<String, Product> products = new HashMap<>();
 
+    // This is only for testing purposes in development
+    public LocalProductRepository() {
+        products.putAll(ProductSeed.createProductsSeed(20));
+    }
+
     @Override
     @NonNull
     public <S extends Product> S save(@NonNull S entity) {
