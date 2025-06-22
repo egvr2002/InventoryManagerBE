@@ -1,5 +1,6 @@
 package inc.encora.inventory_manager.product.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,4 +34,9 @@ public class Product implements Serializable {
 
     @Builder.Default
     private LocalDate updatedAt = LocalDate.now();
+
+    @JsonIgnore
+    public BigDecimal getProductValueInStock() {
+        return unitPrice.multiply(new BigDecimal(quantityInStock));
+    }
 }
