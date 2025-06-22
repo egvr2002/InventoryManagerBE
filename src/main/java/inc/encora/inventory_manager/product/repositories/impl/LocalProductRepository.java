@@ -1,13 +1,12 @@
 package inc.encora.inventory_manager.product.repositories.impl;
 
 import inc.encora.inventory_manager.common.seed.ProductSeed;
-import inc.encora.inventory_manager.common.utils.InMemoryComparatorUtil;
+import inc.encora.inventory_manager.common.utils.InMemoryRespositoryUtil;
+import inc.encora.inventory_manager.product.constants.AvailabilityStatus;
 import inc.encora.inventory_manager.product.models.Product;
 import inc.encora.inventory_manager.product.repositories.ProductRepository;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
@@ -105,36 +104,37 @@ public class LocalProductRepository implements ProductRepository {
 
     @Override
     public Page<Product> findAll(Pageable pageable) {
-        List<Product> allProducts = new ArrayList<>(products.values());
-        Comparator<Product> comparator = null;
-        Sort sort = pageable.getSort();
+        List<Product> allProducts = products.values().stream().toList();
+        return InMemoryRespositoryUtil.applyPaginationAndSorting(allProducts, pageable, Product.class);
+    }
 
-        for (Sort.Order order : sort) {
-            String property = order.getProperty();
-            Comparator<Product> propertyComparator = InMemoryComparatorUtil.getPropertyComparator(Product.class, property);
+    @Override
+    public Page<Product> findByNameOrCategoryOrQuantityInStock(Pageable pageable, String name, List<String> categories, AvailabilityStatus availability) {
+        List<String> loweredCaseCategories = (categories == null) ?
+                Collections.emptyList() :
+                categories.stream().map(String::toLowerCase).toList();
 
-            if (order.isDescending()) {
-                propertyComparator = propertyComparator.reversed();
-            }
+        List<Product> filteredProducts = products
+                .values()
+                .stream()
+                .filter((product -> {
+                    boolean containsName = name == null || product.getName().toLowerCase().contains(name.toLowerCase());
 
-            if (comparator == null) {
-                comparator = propertyComparator;
-            } else {
-                comparator = comparator.thenComparing(propertyComparator);
-            }
-        }
+                    boolean containsCategories = loweredCaseCategories.isEmpty() ||
+                            loweredCaseCategories.contains(product.getCategory().toLowerCase());
 
-        if (comparator != null) {
-            allProducts = allProducts.stream().sorted(comparator).toList();
-        }
+                    boolean isAvailableMatch;
+                    if (availability == null || availability == AvailabilityStatus.ALL) {
+                        isAvailableMatch = true;
+                    } else if (availability == AvailabilityStatus.IN_STOCK) {
+                        isAvailableMatch = product.getQuantityInStock() > 0;
+                    } else { // AvailabilityStatus.OUT_OF_STOCK
+                        isAvailableMatch = product.getQuantityInStock() <= 0;
+                    }
 
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), allProducts.size());
-
-        if (start >= allProducts.size()) {
-            return new PageImpl<>(Collections.emptyList(), pageable, allProducts.size());
-        }
-
-        return new PageImpl<>(allProducts.subList(start, end), pageable, allProducts.size());
+                    return containsName && containsCategories && isAvailableMatch;
+                }))
+                .toList();
+        return InMemoryRespositoryUtil.applyPaginationAndSorting(filteredProducts, pageable, Product.class);
     }
 }
