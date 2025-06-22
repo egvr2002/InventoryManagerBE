@@ -1,6 +1,7 @@
 package inc.encora.inventory_manager.product.services.impl;
 
 import inc.encora.inventory_manager.common.exceptions.ResourceNotFoundException;
+import inc.encora.inventory_manager.product.constants.AvailabilityStatus;
 import inc.encora.inventory_manager.product.constants.DefaultStockValues;
 import inc.encora.inventory_manager.product.dtos.ProductDTO;
 import inc.encora.inventory_manager.product.mappers.ProductMapper;
@@ -11,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -47,6 +51,7 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setUnitPrice(productToUpdate.getUnitPrice());
         existingProduct.setExpirationDate(productToUpdate.getExpirationDate());
         existingProduct.setQuantityInStock(productToUpdate.getQuantityInStock());
+        existingProduct.setUpdatedAt(LocalDate.now());
 
         return productRepository.save(existingProduct);
     }
@@ -57,13 +62,18 @@ public class ProductServiceImpl implements ProductService {
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
+        existingProduct.setUpdatedAt(LocalDate.now());
         existingProduct.setQuantityInStock(DefaultStockValues.OUT_OF_STOCK.getValue());
         productRepository.save(existingProduct);
     }
 
     @Override
     public void markProductInStock(String id) {
-        Product existingProduct = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        Product existingProduct = productRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        existingProduct.setUpdatedAt(LocalDate.now());
         existingProduct.setQuantityInStock(DefaultStockValues.RESTORED_STOCK.getValue());
         productRepository.save(existingProduct);
     }
@@ -72,5 +82,10 @@ public class ProductServiceImpl implements ProductService {
     public void deleteById(String id) {
         productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         productRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<Product> search(Pageable pageable, String name, List<String> category, AvailabilityStatus availability) {
+        return productRepository.findByNameOrCategoryOrQuantityInStock(pageable, name, category, availability);
     }
 }
