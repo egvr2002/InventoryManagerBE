@@ -75,4 +75,14 @@ public class ProductController {
         productService.markProductInStock(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @GetMapping("/categories")
+    private ResponseEntity<?> findAllCategories() {
+        return ResponseEntity.ok(productService.findAllCategories());
+    }
+
+    @GetMapping("/metrics")
+    private ResponseEntity<?> getInventoryMetrics() {
+        return ResponseEntity.ok(productService.getInventoryMetrics());
+    }
 }
