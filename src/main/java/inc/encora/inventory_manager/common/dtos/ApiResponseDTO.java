@@ -1,16 +1,18 @@
 package inc.encora.inventory_manager.common.dtos;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ErrorDto<T> implements Serializable {
-    private String error;
+@Builder
+public class ApiResponseDTO<T, K> {
+    private String status;
     private int statusCode;
-    private T message;
+    private String message;
+    private T data;
+    private K error;
 }

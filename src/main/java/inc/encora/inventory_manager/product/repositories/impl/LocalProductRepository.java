@@ -1,7 +1,7 @@
 package inc.encora.inventory_manager.product.repositories.impl;
 
 import inc.encora.inventory_manager.common.seed.ProductSeed;
-import inc.encora.inventory_manager.common.utils.InMemoryRespositoryUtil;
+import inc.encora.inventory_manager.common.utils.InMemoryRepositoryUtil;
 import inc.encora.inventory_manager.product.constants.AvailabilityStatus;
 import inc.encora.inventory_manager.product.models.Product;
 import inc.encora.inventory_manager.product.repositories.ProductRepository;
@@ -105,7 +105,7 @@ public class LocalProductRepository implements ProductRepository {
     @Override
     public Page<Product> findAll(Pageable pageable) {
         List<Product> allProducts = products.values().stream().toList();
-        return InMemoryRespositoryUtil.applyPaginationAndSorting(allProducts, pageable, Product.class);
+        return InMemoryRepositoryUtil.applyPaginationAndSorting(allProducts, pageable, Product.class);
     }
 
     @Override
@@ -120,9 +120,9 @@ public class LocalProductRepository implements ProductRepository {
                 .filter((product -> {
                     boolean containsName = name == null || product.getName().toLowerCase().contains(name.toLowerCase());
 
-                    boolean containsCategories = loweredCaseCategories.isEmpty() ||
-                            loweredCaseCategories.contains(product.getCategory().toLowerCase());
-
+                    boolean containsCategories = loweredCaseCategories.isEmpty()
+                            || loweredCaseCategories.getFirst().equalsIgnoreCase("all")
+                            || loweredCaseCategories.contains(product.getCategory().toLowerCase());
                     boolean isAvailableMatch;
                     if (availability == null || availability == AvailabilityStatus.ALL) {
                         isAvailableMatch = true;
@@ -135,6 +135,6 @@ public class LocalProductRepository implements ProductRepository {
                     return containsName && containsCategories && isAvailableMatch;
                 }))
                 .toList();
-        return InMemoryRespositoryUtil.applyPaginationAndSorting(filteredProducts, pageable, Product.class);
+        return InMemoryRepositoryUtil.applyPaginationAndSorting(filteredProducts, pageable, Product.class);
     }
 }
