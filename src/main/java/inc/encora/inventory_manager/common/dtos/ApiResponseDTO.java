@@ -14,16 +14,16 @@ import lombok.NoArgsConstructor;
 public class ApiResponseDTO<T, K> {
     @Schema(description = "Response status", example = "Ok")
     private String status;
-    
+
     @Schema(description = "HTTP status code", example = "200")
     private int statusCode;
-    
+
     @Schema(description = "Response message", example = "Operation completed successfully")
     private String message;
-    
+
     @Schema(description = "Response data payload")
     private T data;
-    
+
     @Schema(description = "Error information if any")
     private K error;
 }
