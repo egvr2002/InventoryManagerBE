@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class InMemoryRespositoryUtil {
+public class InMemoryRepositoryUtil {
     public static <T> Page<T> applyPaginationAndSorting(List<T> data, Pageable pageable, Class<T> entityClass) {
         Comparator<T> comparator = null;
         Sort sort = pageable.getSort();

@@ -1,5 +1,6 @@
 package inc.encora.inventory_manager.product.controllers;
 
+import inc.encora.inventory_manager.common.dtos.ApiResponseDTO;
 import inc.encora.inventory_manager.product.constants.AvailabilityStatus;
 import inc.encora.inventory_manager.product.dtos.ProductDTO;
 import inc.encora.inventory_manager.product.models.Product;
@@ -32,13 +33,25 @@ public class ProductController {
             sort = "name",
             direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return ResponseEntity.ok(productService.findAll(pageable));
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                "Ok",
+                HttpStatus.OK.value(),
+                "Products retrieved successfully",
+                productService.findAll(pageable),
+                null
+        ));
     }
 
     @PostMapping
     private ResponseEntity<?> save(@Valid @RequestBody ProductDTO productDTO) {
         Product product = productService.save(productDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(product);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(
+                "Ok",
+                HttpStatus.OK.value(),
+                "Product saved successfully",
+                product,
+                null
+        ));
     }
 
     @GetMapping("/search")
@@ -49,40 +62,82 @@ public class ProductController {
             @RequestParam(name = "availability", required = false, defaultValue = "all") AvailabilityStatus availability
     ) {
         Page<Product> results = productService.search(pageable, name, category, availability);
-        return ResponseEntity.ok(results);
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                "Ok",
+                HttpStatus.OK.value(),
+                "Products retrieved successfully",
+                results,
+                null
+        ));
     }
 
     @PutMapping("/{id}")
     private ResponseEntity<?> update(@PathVariable String id, @Valid @RequestBody ProductDTO productDTO) {
         Product updatedProduct = productService.update(id, productDTO);
-        return ResponseEntity.ok(updatedProduct);
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                "Ok",
+                HttpStatus.OK.value(),
+                "Product updated successfully",
+                updatedProduct,
+                null
+        ));
     }
 
     @DeleteMapping("/{id}")
     private ResponseEntity<?> delete(@PathVariable String id) {
         productService.deleteById(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                "Ok",
+                HttpStatus.OK.value(),
+                "Product deleted successfully",
+                null,
+                null
+        ));
     }
 
     @PostMapping("/{id}/outofstock")
     private ResponseEntity<?> markOutOfStock(@PathVariable String id) {
         productService.markProductOutOfStock(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                "Ok",
+                HttpStatus.OK.value(),
+                "Product marked as out of stock successfully",
+                null,
+                null
+        ));
     }
 
     @PostMapping("/{id}/instock")
     private ResponseEntity<?> markInStock(@PathVariable String id) {
         productService.markProductInStock(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                "Ok",
+                HttpStatus.OK.value(),
+                "Product marked as in stock successfully",
+                null,
+                null
+        ));
     }
 
     @GetMapping("/categories")
     private ResponseEntity<?> findAllCategories() {
-        return ResponseEntity.ok(productService.findAllCategories());
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                "Ok",
+                HttpStatus.OK.value(),
+                "Categories retrieved successfully",
+                productService.findAllCategories(),
+                null
+        ));
     }
 
     @GetMapping("/metrics")
     private ResponseEntity<?> getInventoryMetrics() {
-        return ResponseEntity.ok(productService.getInventoryMetrics());
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                "Ok",
+                HttpStatus.OK.value(),
+                "Inventory metrics retrieved successfully",
+                productService.getInventoryMetrics(),
+                null
+        ));
     }
 }
