@@ -46,4 +46,18 @@ public class GlobalExceptionHandler {
                 error
         );
     }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception.class)
+    public ApiResponseDTO<Object, Map<String, String>> handleAllExceptions(Exception ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("details", "An unexpected error occurred. Please contact support if the issue persists.");
+        return new ApiResponseDTO<>(
+                "Unexpected Error",
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                null,
+                error
+        );
+    }
 }
